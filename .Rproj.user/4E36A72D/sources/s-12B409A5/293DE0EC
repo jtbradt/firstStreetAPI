@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1596805881256.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "293DE0EC",
+    "lastKnownWriteTime" : 1596806955,
+    "last_content_update" : 1596806955715,
+    "path" : "~/Documents/Research/2019.08 -- First Street/firstStreetAPI/R/set_api_key.R",
+    "project_path" : "R/set_api_key.R",
+    "properties" : {
+        "cursorPosition" : "3,27",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1596805889094.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "1C08ECD8",
+    "lastKnownWriteTime" : 1596806534,
+    "last_content_update" : 1596806534016,
+    "path" : "~/Documents/Research/2019.08 -- First Street/firstStreetAPI/R/fsf_query.R",
+    "project_path" : "R/fsf_query.R",
+    "properties" : {
+        "cursorPosition" : "8,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
