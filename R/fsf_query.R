@@ -6,7 +6,6 @@
 #' @param arg is a query argument
 #' @keywords fsf.query
 #' @export
-#' @import httr
 
 fsf.query <- function(api.cat, api, arg) {
 
@@ -14,8 +13,8 @@ fsf.query <- function(api.cat, api, arg) {
   path <- paste(pkg.env$api.version, api.cat, api, arg, sep = "/")
 
   # Query FSF API:
-  url <- modify_url("https://api.firststreet.org/", path = path)
-  resp <- GET(url, query = list(key = pkg.env$api.key))
+  url <- httr::modify_url("https://api.firststreet.org/", path = path)
+  resp <- httr::GET(url, query = list(key = pkg.env$api.key))
 
   if(resp$status_code == "200") {
     return(resp)

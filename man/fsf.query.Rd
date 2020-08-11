@@ -4,14 +4,14 @@
 \alias{fsf.query}
 \title{FSF query function}
 \usage{
-fsf.query(api.cat, api, location)
+fsf.query(api.cat, api, arg)
 }
 \arguments{
 \item{api.cat}{is one of FSF's 7 API categories}
 
 \item{api}{is one of FSF's 18 APIs}
 
-\item{location}{is a formatted location lookup object (see location.lookup fxn)}
+\item{arg}{is a query argument}
 }
 \description{
 This function constructs a fsf API request:

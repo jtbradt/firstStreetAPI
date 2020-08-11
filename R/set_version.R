@@ -1,6 +1,7 @@
 #' Define package environment
-#' @title api.version
-#' \code{version} with the user's First Street Foundation (FSF) API key
+#' @name default.api.version
+#' @description Sets default API version
+#' @details Sets default API version. To change API version, use function set.api.version()
 assign("api.version", "v1", envir = pkg.env)
 
 #' Set the First Street Foundation API version

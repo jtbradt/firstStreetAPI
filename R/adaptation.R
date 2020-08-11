@@ -6,10 +6,6 @@
 #' @param lookup.arg is the location used for the lookup
 #' @keywords adaptation.projects
 #' @export
-#' @import tidyverse
-#' @import httr
-#' @import jsonlite
-#' @import data.table
 
 adaptation.projects <-
   function(lookup.type,
@@ -34,11 +30,12 @@ adaptation.projects <-
 
       # Parse adaptation project summary data:
       parsed <-
-        jsonlite::fromJSON(content(temp.resp, "text"), simplifyVector = TRUE)
-      temp.return <- data.table(cbind(parsed$fsid, parsed$adaptation, parsed$properties))
+        jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
+      temp.return <-
+        data.table::data.table(cbind(parsed$fsid, parsed$adaptation, parsed$properties))
 
       # Set to null if no adaptation projects returned:
-      if(ncol(temp.return)==1) {
+      if (ncol(temp.return) == 1) {
         temp.return <- NULL
       } else {
         # Set summary field names:
@@ -47,10 +44,11 @@ adaptation.projects <-
         # If detailed data requested, retrieve from FSF API:
         if (detail == TRUE) {
           # Retrieve detailed data on unique adaptation projects:
-          detail <- adaptation.detail(temp.return$adaptation, geometry = geometry)
+          detail <-
+            adaptation.detail(temp.return$adaptation, geometry = geometry)
 
           # Add FSID and FSID type fields:
-          temp.return <- lapply(detail, function(x){
+          temp.return <- lapply(detail, function(x) {
             x$fsid <- l
             x$fsid.type <- loc.type
             return(x)
@@ -63,16 +61,32 @@ adaptation.projects <-
       return(temp.return)
     })
 
-    # Bind across data types (detail and geometry):
-    return <-
-      lapply(1:length(resp[[1]]), function(l)
-        do.call(rbind, lapply(resp, function(x)
-          x[[l]])))
+    # If detailed data requested, format and or throw null return error if applicable:
+    if (detail == TRUE) {
+      # Bind across data types (detail and geometry):
+      return <-
+        lapply(1:length(resp[[1]]), function(l)
+          do.call(rbind, lapply(resp, function(x)
+            x[[l]])))
 
-    # Stop if no adaptation projects in full query:
-    if(length(return[[1]])==0) {
-      stop("No adaptation projects returned for query. Try a different geography.")
+      # Stop if no adaptation projects in full query:
+      if (length(return[[1]]) == 0) {
+        stop("No adaptation projects returned for query. Try a different geography.")
+      }
     }
+    # If detailed data not requested name return object and throw null return error if applicable:
+    else {
+      # Name return object:
+      return <- do.call(rbind, resp)
+
+      # Stop if no adaptation projects in full query:
+      if (length(return) == 0) {
+        stop("No adaptation projects returned for query. Try a different geography.")
+      }
+    }
+
+    # Return relevant return object:
+    return(return)
   }
 
 #' Adaptation detail function
@@ -81,11 +95,6 @@ adaptation.projects <-
 #' @param adaptation.ids is a list of adaptation ids
 #' @keywords adaptation.detail
 #' @export
-#' @import tidyverse
-#' @import httr
-#' @import jsonlite
-#' @import data.table
-#' @import sf
 
 adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
   # Loop over adaptation.ids argument:
@@ -98,11 +107,11 @@ adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
     } else {
       # Parse detailed adaptation project data:
       parsed <-
-        jsonlite::fromJSON(content(temp.resp, "text"), simplifyVector = TRUE)
+        jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
 
       # Replace null return objects with NA:
-      parsed <- lapply(parsed, function(x){
-        if(is.null(x)){
+      parsed <- lapply(parsed, function(x) {
+        if (is.null(x)) {
           x <- NA
         } else {
           x <- x
@@ -111,17 +120,17 @@ adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
 
       # Construct detail.data detail object for export:
       detail <-
-        data.table(
+        data.table::data.table(
           cbind(
             parsed$adaptationId,
             parsed$name,
-            expand_grid(parsed$type, parsed$scenario),
+            tidyr::expand_grid(parsed$type, parsed$scenario),
             parsed$conveyance,
             parsed$returnPeriod,
             t(parsed$serving)
           )
         )
-      setnames(
+      data.table::setnames(
         detail,
         names(detail)[1:6],
         new = c(
@@ -141,14 +150,15 @@ adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
 
         # Convert parsed geometry data to list of list of long-lat arrays:
         geometry.list <- lapply(seq(dim(geometry)[1]), function(i) {
-          geometry[i, , ,] <- lapply(seq(dim(geometry)[2]), function(j) {
-            geometry[, j, ,]
+          geometry[i, , , ] <- lapply(seq(dim(geometry)[2]), function(j) {
+            geometry[, j, , ]
           })
         })
 
         # Convert nested list of long-lat arrays to sf object:
-        geometry.sfc <- st_sfc(st_multipolygon(geometry.list)) %>%
-          st_set_crs(., 4326)
+        geometry.sfc <-
+          sf::st_sfc(sf::st_multipolygon(geometry.list)) %>%
+          sf::st_set_crs(., 4326)
 
         # Generate df of adaptation id:
         adaptation.id <- data.frame(i)
@@ -156,7 +166,7 @@ adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
 
         # Bind adaptation id field to features:
         detail.geometry <- cbind(adaptation.id, geometry.sfc) %>%
-          st_as_sf
+          sf::st_as_sf(.)
 
         # List adaptation project detailed data and geographic data objects:
         detail <- list(detail, detail.geometry)

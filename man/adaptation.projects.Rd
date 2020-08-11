@@ -2,9 +2,15 @@
 % Please edit documentation in R/adaptation.R
 \name{adaptation.projects}
 \alias{adaptation.projects}
-\title{Adaptation-projects function}
+\title{Adaptation projects function}
 \usage{
-adaptation.projects(lookup.type, loc.type, lookup.arg, detail = TRUE)
+adaptation.projects(
+  lookup.type,
+  loc.type,
+  lookup.arg,
+  detail = TRUE,
+  geometry = TRUE
+)
 }
 \arguments{
 \item{lookup.type}{is the lookup type}

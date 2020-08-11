@@ -2,7 +2,7 @@
 % Please edit documentation in R/adaptation.R
 \name{adaptation.detail}
 \alias{adaptation.detail}
-\title{Adaptation-detail function}
+\title{Adaptation detail function}
 \usage{
 adaptation.detail(adaptation.ids, geometry = TRUE)
 }
