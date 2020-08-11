@@ -8,18 +8,18 @@
 #' @export
 
 fsf.query <- function(api.cat, api, arg) {
-
-  # Create path:
-  path <- paste(pkg.env$api.version, api.cat, api, arg, sep = "/")
-
-  # Query FSF API:
-  url <- httr::modify_url("https://api.firststreet.org/", path = path)
-  resp <- httr::GET(url, query = list(key = pkg.env$api.key))
-
-  if(resp$status_code == "200") {
-    return(resp)
-  } else {
-    return(resp$status_code)
-  }
-
+    
+    # Create path:
+    path <- paste(pkg.env$api.version, api.cat, api, arg, sep = "/")
+    
+    # Query FSF API:
+    url <- httr::modify_url("https://api.firststreet.org/", path = path)
+    resp <- httr::GET(url, query = list(key = pkg.env$api.key))
+    
+    if (resp$status_code == "200") {
+        return(resp)
+    } else {
+        return(resp$status_code)
+    }
+    
 }

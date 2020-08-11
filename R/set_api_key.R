@@ -15,7 +15,7 @@ assign("api.key", NULL, envir = pkg.env)
 #' @return the user's api key
 #' @export
 get.api.key = function() {
-  get("api.key", envir = pkg.env)
+    get("api.key", envir = pkg.env)
 }
 
 
@@ -27,5 +27,5 @@ get.api.key = function() {
 #' @param key is the user's FSF key
 #' @export
 set.api.key = function(key) {
-  assign("api.key", key, envir = pkg.env)
+    assign("api.key", key, envir = pkg.env)
 }

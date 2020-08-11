@@ -12,5 +12,5 @@ assign("api.version", "v1", envir = pkg.env)
 #' @param version is the user's FSF key
 #' @export
 set.api.version = function(version = "v1") {
-  assign("api.version", version, envir = pkg.env)
+    assign("api.version", version, envir = pkg.env)
 }

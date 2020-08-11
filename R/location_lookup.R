@@ -8,25 +8,19 @@
 #' @export
 
 location.lookup <- function(lookup, type, arg) {
-
-  if(lookup == "fsid"){
-    lookup <- paste(type, arg, sep = "/")
-  }
-
-  else if (lookup == "coordinate") {
-    lat = strsplit(arg, ",")[[1]][1]
-    lon = strsplit(arg, ",")[[1]][2]
-    lookup <- paste0(type, "?lat=", lat, "&lng=", lon)
-  }
-
-  else if (lookup == "address") {
-    lookup <- paste0(type, "?address=", arg)
-  }
-
-  else {
-    stop("Lookup must be of type fsid, coordinate, or address.")
-  }
-
-  return(lookup)
-
+    
+    if (lookup == "fsid") {
+        lookup <- paste(type, arg, sep = "/")
+    } else if (lookup == "coordinate") {
+        lat = strsplit(arg, ",")[[1]][1]
+        lon = strsplit(arg, ",")[[1]][2]
+        lookup <- paste0(type, "?lat=", lat, "&lng=", lon)
+    } else if (lookup == "address") {
+        lookup <- paste0(type, "?address=", arg)
+    } else {
+        stop("Lookup must be of type fsid, coordinate, or address.")
+    }
+    
+    return(lookup)
+    
 }
