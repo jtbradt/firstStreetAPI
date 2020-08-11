@@ -4,7 +4,7 @@
 \alias{set.api.version}
 \title{Set the First Street Foundation API version}
 \usage{
-set.api.version(version)
+set.api.version(version = "v1")
 }
 \arguments{
 \item{version}{is the user's FSF key}

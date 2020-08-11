@@ -3,15 +3,15 @@
 #' This function constructs a fsf API request:
 #' @param api.cat is one of FSF's 7 API categories
 #' @param api is one of FSF's 18 APIs
-#' @param location is a formatted location lookup object (see location.lookup fxn)
+#' @param arg is a query argument
 #' @keywords fsf.query
 #' @export
 #' @import httr
 
-fsf.query <- function(api.cat, api, location) {
+fsf.query <- function(api.cat, api, arg) {
 
   # Create path:
-  path <- paste(pkg.env$version, api.cat, api, location, sep = "/")
+  path <- paste(pkg.env$api.version, api.cat, api, arg, sep = "/")
 
   # Query FSF API:
   url <- modify_url("https://api.firststreet.org/", path = path)

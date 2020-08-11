@@ -1,8 +1,7 @@
 #' Define package environment
-#'
+#' @title api.version
 #' \code{version} with the user's First Street Foundation (FSF) API key
-assign("version", "v1", envir = pkg.env)
-
+assign("api.version", "v1", envir = pkg.env)
 
 #' Set the First Street Foundation API version
 #'
@@ -11,6 +10,6 @@ assign("version", "v1", envir = pkg.env)
 #'
 #' @param version is the user's FSF key
 #' @export
-set.api.version = function(version) {
-  assign("version", version, envir = pkg.env)
+set.api.version = function(version = "v1") {
+  assign("api.version", version, envir = pkg.env)
 }
