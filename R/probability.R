@@ -1,6 +1,6 @@
 #' Probability function
 #'
-#' This function queries the Adaptation Summary API:
+#' This function queries the probability API:
 #' @param lookup.type is the lookup type
 #' @param loc.type is the type of location used in lookup
 #' @param lookup.arg is the location used for the lookup
@@ -43,5 +43,5 @@ probability <- function(lookup.type, loc.type, lookup.arg, probability.api) {
         return$fsid <- parsed[[1]]
         
         return(return)
-    })
+    }) %>% do.call(rbind, .)
 }

@@ -16,6 +16,6 @@ probability(lookup.type, loc.type, lookup.arg, probability.api)
 \item{probability.api}{is the specific probability API (depth, chance, cumulative, count) to query}
 }
 \description{
-This function queries the Adaptation Summary API:
+This function queries the probability API:
 }
 \keyword{probability}
