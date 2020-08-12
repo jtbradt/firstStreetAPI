@@ -113,17 +113,7 @@ adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
             # If geometry is specified, parse and format as SF object:
             if (geometry == TRUE) {
                 # Extract geometry data from parsed response:
-                geometry <- parsed$geometry$polygon$coordinates
-                
-                # Convert parsed geometry data to list of list of long-lat arrays:
-                geometry.list <- lapply(seq(dim(geometry)[1]), function(i) {
-                  geometry[i, , , ] <- lapply(seq(dim(geometry)[2]), function(j) {
-                    geometry[, j, , ]
-                  })
-                })
-                
-                # Convert nested list of long-lat arrays to sf object:
-                geometry.sfc <- sf::st_sfc(sf::st_multipolygon(geometry.list)) %>% sf::st_set_crs(., 4326)
+                geometry <- process.geometry(parsed)
                 
                 # Generate df of adaptation id:
                 adaptation.id <- data.frame(i)

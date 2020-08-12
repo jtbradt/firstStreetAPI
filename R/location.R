@@ -60,26 +60,11 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
             # If geometry requested:
             if (geometry == TRUE) {
                 # Extract geometry data from parsed response:
-                geometry <- parsed$geometry$polygon$coordinates
+                geometry <- process.geometry(parsed)
                 
-                if (is.null(geometry)) {
-                  warning("Empty geography returned. No geography data available from API for search.")
-                } else {
-                  # If single array returned, format as list:
-                  if (class(geometry) == "array") {
-                    # Convert parsed geometry data to list of list of long-lat arrays:
-                    geometry <- lapply(seq(dim(geometry)[1]), function(i) {
-                      geometry[i, , , ] <- lapply(seq(dim(geometry)[2]), function(j) {
-                        geometry[, j, , ]
-                      })
-                    })
-                  }
-                  
-                  # Convert nested list of long-lat arrays to sf object:
-                  geometry.sfc <- sf::st_sfc(sf::st_multipolygon(geometry)) %>% sf::st_set_crs(., 4326)
-                  
+                if (class(geometry)[1] != "character") {
                   # Bind geometry data to non-geometry data:
-                  return <- cbind(return, geometry.sfc) %>% sf::st_as_sf(.)
+                  return <- cbind(return, geometry) %>% sf::st_as_sf(.)
                 }
             }
         }
@@ -89,5 +74,13 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
         
         # Return object:
         return(return)
-    }) %>% dplyr::bind_rows(.)
+    })
+    
+    if (length(lookup.arg) > 1) {
+        resp <- dplyr::bind_rows(resp)
+    } else {
+        resp <- resp[[1]]
+    }
+    
+    return(resp)
 }
