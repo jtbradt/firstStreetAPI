@@ -14,127 +14,86 @@ adaptation <- function(lookup.type, loc.type, lookup.arg, detail = TRUE, geometr
     resp <- lapply(lookup.arg, function(l) {
         # Generate location lookup:
         lookup <- location.lookup(lookup = lookup.type, type = loc.type, arg = l)
-
+        
         # Retrieve list of adaptation projects obtained from given location lookup from FSF API:
         temp.resp <- fsf.query("adaptation", "summary", lookup)
-
+        
         # If unsuccessful, return HTTP code:
         if (typeof(temp.resp) == "integer") {
             stop(paste0("FSF API query returned the following HTTP code:", temp.resp))
         }
-
+        
         # Parse adaptation project summary data:
         parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
-        temp.return <- data.table::data.table(cbind(parsed$fsid, parsed$adaptation, parsed$properties))
-
-        # Set to null if no adaptation projects returned:
-        if (ncol(temp.return) == 1) {
-            temp.return <- NULL
-        } else {
-            # Set summary field names:
-            names(temp.return) <- c("fsid", "adaptation", "properties")
-
-            # If detailed data requested, retrieve from FSF API:
-            if (detail == TRUE) {
-                # Retrieve detailed data on unique adaptation projects:
-                detail <- adaptation.detail(temp.return$adaptation, geometry = geometry)
-
-                # Add FSID and FSID type fields:
-                temp.return <- lapply(detail, function(x) {
-                  x$fsid <- l
-                  x$fsid.type <- loc.type
-                  return(x)
-                })
-            } else {
-                # Add FSID type field:
-                temp.return$fsid.type <- loc.type
-            }
-        }
-        return(temp.return)
-    })
-
-    # If detailed data requested, format and or throw null return error if applicable:
-    if (detail == TRUE) {
-        # Bind across data types (detail and geometry):
-        return <- lapply(1:length(resp[[1]]), function(l) do.call(rbind, lapply(resp, function(x) x[[l]])))
-
-        # Stop if no adaptation projects in full query:
-        if (length(return[[1]]) == 0) {
-            stop("No adaptation projects returned for query. Try a different geography.")
-        }
-    } else {
-        # Name return object:
-        return <- do.call(rbind, resp)
-
-        # Stop if no adaptation projects in full query:
-        if (length(return) == 0) {
-            stop("No adaptation projects returned for query. Try a different geography.")
-        }
-    }
-
-    # Return relevant return object:
-    return(return)
-}
-
-#' Adaptation detail function
-#'
-#' This function queries the Adaptation Detail API:
-#' @param adaptation.ids is a list of adaptation ids
-#' @keywords adaptation.detail
-#' @export
-
-adaptation.detail <- function(adaptation.ids, geometry = TRUE) {
-    # Loop over adaptation.ids argument:
-    resp <- lapply(adaptation.ids, function(i) {
-        # Retrieve detailed data on adaptaion project from FSF API:
-        temp.resp <- fsf.query("adaptation", "detail", i)
-
-        if (typeof(temp.resp) == "integer") {
-            temp.return <- NULL
-        } else {
-            # Parse detailed adaptation project data:
-            parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
-
-            # Replace null return objects with NA:
-            parsed <- lapply(parsed, function(x) {
-                if (is.null(x)) {
-                  x <- NA
-                } else {
-                  x <- x
-                }
-            })
-
-            # Construct detail.data detail object for export:
-            detail <- data.table::data.table(cbind(parsed$adaptationId, parsed$name, tidyr::expand_grid(parsed$type, parsed$scenario),
-                parsed$conveyance, parsed$returnPeriod, t(parsed$serving)))
-            data.table::setnames(detail, names(detail)[1:6], new = c("adaptation", "name", "type", "scenario", "conveyance",
-                "return.period"))
-
-            # If geometry is specified, parse and format as SF object:
+        
+        # Generate fsid data:
+        fsid <- data.table::data.table(parsed$fsid)
+        names(fsid) <- "fsid"
+        fsid$fsid.type <- loc.type
+        
+        # If summary requested, format summary response:
+        if (detail == FALSE) {
+            # If detail not requested but geometry requested, throw error
             if (geometry == TRUE) {
-                # Extract geometry data from parsed response:
-                geometry.data <- process.geometry(parsed)
-
-                # Generate df of adaptation id:
-                adaptation.id <- data.frame(i)
-                names(adaptation.id) <- "adaptation"
-
-                # Bind adaptation id field to features:
-                detail.geometry <- cbind(adaptation.id, geometry.data) %>% sf::st_as_sf(.)
-
-                # List adaptation project detailed data and geographic data objects:
-                detail <- list(detail, detail.geometry)
+                stop("Cannot return geometry data from the summary API. Specify option 'detail == TRUE' to return geometry data.")
             }
-
-            # Return requested detail data from parsed successful response:
-            temp.return <- detail
+            
+            # Generate summary adaptaion data:
+            if (length(parsed[[2]]) != 0) {
+                adaptation.summary <- data.table::data.table(cbind(parsed$adaptation, parsed$properties))
+                names(adaptation.summary) <- c("adaptation", "properties")
+            } else {
+                adaptation.summary <- NULL
+            }
+            
+            # Bind return object:
+            return <- cbind(fsid, adaptation.summary)
+        } else {
+            # If no adaptation projects for queried geometry, null return:
+            if (length(parsed[[2]]) == 0) {
+                return <- fsid
+            } else {
+                # Extract adaptation ids from summary API response
+                adaptation.id <- parsed$adaptation
+                
+                # For each adaptation id, retrieve response from detail API:
+                adapt.resp <- lapply(adaptation.id, function(a) {
+                  # Retrieve response from detail API:
+                  temp.resp.adapt <- fsf.query("adaptation", "detail", a)
+                  
+                  # Parse response from detail API:
+                  parsed.adapt <- jsonlite::fromJSON(httr::content(temp.resp.adapt, "text"), simplifyVector = TRUE)
+                  
+                  # Process non-geometry data:
+                  temp.return <- parsed.adapt
+                  temp.return[[length(temp.return)]] <- NULL
+                  temp.return <- data.frame(t(unlist(temp.return)))
+                  
+                  # If geometry requested:
+                  if (geometry == TRUE) {
+                    # Extract geometry data from parsed response:
+                    geometry.data <- process.geometry(parsed.adapt)
+                    
+                    # If retruned geometry data is non-empty:
+                    if (class(geometry.data)[1] != "character") {
+                      # Bind geometry data to non-geometry data:
+                      temp.return <- cbind(temp.return, geometry.data) %>% sf::st_as_sf(.)
+                    }
+                  }
+                  return(temp.return)
+                }) %>% data.table::rbindlist(., fill = TRUE)
+                return <- adapt.resp
+                return$fsid <- fsid$fsid
+                return$fsid.type <- fsid$fsid.type
+            }
         }
-
-        # Return either HTTP code or parsed successful response:
-        return(temp.return)
-    })
-
-    # Bind across data types (detail and geometry):
-    return <- lapply(1:length(resp[[1]]), function(l) do.call(rbind, lapply(resp, function(x) x[[l]])))
-    return(return)
+        return(return)
+    }) %>% data.table::rbindlist(., fill = TRUE)
+    
+    # If geometry requested, convert final return to sf object:
+    if ("geometry" %in% colnames(resp)) {
+        resp <- sf::st_as_sf(resp)
+    }
+    return(resp)
 }
+
