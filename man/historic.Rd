@@ -4,7 +4,7 @@
 \alias{historic}
 \title{Historic function}
 \usage{
-historic()
+historic(lookup.type, loc.type, lookup.arg, event = TRUE, geometry = TRUE)
 }
 \arguments{
 \item{lookup.type}{is the lookup type}
@@ -13,7 +13,7 @@ historic()
 
 \item{lookup.arg}{is the location used for the lookup}
 
-\item{detail}{is a boolean indicating whether detailed adaptaion project information should be returned}
+\item{event}{is a boolean indicating whether detailed event information should be returned}
 
 \item{geometry}{is a boolean indicating whether geometry data should be returned}
 }

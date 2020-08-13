@@ -14,28 +14,28 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
     resp <- lapply(lookup.arg, function(l) {
         # Generate location lookup:
         lookup <- location.lookup(lookup = lookup.type, type = loc.type, arg = l)
-        
+
         # Format separate responses if summary or detail requested:
         if (detail == FALSE) {
             # If detail not requested but geometry requested, throw error
-            if (detail == FALSE & geometry == TRUE) {
-                stop("Cannot return geometry data from the detail API. Specify option 'detail == TRUE' to return geometry data.")
+            if (geometry == TRUE) {
+                stop("Cannot return geometry data from the summary API. Specify option 'detail == TRUE' to return geometry data.")
             }
-            
+
             # Retrieve list of adaptation projects obtained from given location lookup from FSF API:
             temp.resp <- fsf.query("location", "summary", lookup)
-            
+
             # If unsuccessful, return HTTP code:
             if (typeof(temp.resp) == "integer") {
                 stop(paste0("FSF API query returned the following HTTP code:", temp.resp))
             }
-            
+
             # Parse adaptation project summary data:
             parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
-            
+
             # Format return object:
             return <- data.table::data.table(t(parsed))
-            
+
             # If non-property type location, unnest property counts:
             if (loc.type != "property") {
                 return <- return %>% pull(properties) %>% transpose %>% map_df(unlist) %>% bind_cols(return, .) %>% select(-properties)
@@ -43,44 +43,44 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
         } else {
             # Retrieve list of adaptation projects obtained from given location lookup from FSF API:
             temp.resp <- fsf.query("location", "detail", lookup)
-            
+
             # If unsuccessful, return HTTP code:
             if (typeof(temp.resp) == "integer") {
                 stop(paste0("FSF API query returned the following HTTP code:", temp.resp))
             }
-            
+
             # Parse adaptation project summary data:
             parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
-            
+
             # Format non-geometry return object:
             return <- parsed
             return[[length(return)]] <- NULL
             return <- data.frame(t(unlist(return)))
-            
+
             # If geometry requested:
             if (geometry == TRUE) {
                 # Extract geometry data from parsed response:
-                geometry <- process.geometry(parsed)
-                
-                if (class(geometry)[1] != "character") {
+                geometry.data <- process.geometry(parsed)
+
+                if (class(geometry.data)[1] != "character") {
                   # Bind geometry data to non-geometry data:
-                  return <- cbind(return, geometry) %>% sf::st_as_sf(.)
+                  return <- cbind(return, geometry.data) %>% sf::st_as_sf(.)
                 }
             }
         }
-        
+
         # Add location type field:
         return$fsid.type <- loc.type
-        
+
         # Return object:
         return(return)
     })
-    
+
     if (length(lookup.arg) > 1) {
         resp <- dplyr::bind_rows(resp)
     } else {
         resp <- resp[[1]]
     }
-    
+
     return(resp)
 }
