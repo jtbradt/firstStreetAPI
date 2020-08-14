@@ -60,7 +60,7 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
             # If geometry requested:
             if (geometry == TRUE) {
                 # Extract geometry data from parsed response:
-                geometry.data <- process.geometry(parsed)
+                geometry.data <- process.geometry(parsed$geometry$polygon)
                 
                 if (class(geometry.data)[1] != "character") {
                   # Bind geometry data to non-geometry data:

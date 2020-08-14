@@ -10,7 +10,7 @@
 #' @export
 
 historic <- function(lookup.type, loc.type, lookup.arg, event = TRUE, geometry = TRUE) {
-    # Retrieve list of adaptation projects for lookup arguments:
+    # Retrieve list of historic events for lookup arguments:
     resp <- lapply(lookup.arg, function(l) {
         # Generate location lookup:
         lookup <- location.lookup(lookup = lookup.type, type = loc.type, arg = l)
@@ -23,7 +23,7 @@ historic <- function(lookup.type, loc.type, lookup.arg, event = TRUE, geometry =
             stop(paste0("FSF API query returned the following HTTP code:", temp.resp))
         }
         
-        # Parse adaptation project summary data:
+        # Parse historic event summary data:
         parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
         
         # Generate fsid data:
@@ -71,7 +71,7 @@ historic <- function(lookup.type, loc.type, lookup.arg, event = TRUE, geometry =
                   # If geometry requested:
                   if (geometry == TRUE) {
                     # Extract geometry data from parsed response:
-                    geometry.data <- process.geometry(parsed.event)
+                    geometry.data <- process.geometry(parsed.event$geometry$polygon)
                     
                     # If returned geometry data is non-empty:
                     if (class(geometry.data)[1] != "character") {

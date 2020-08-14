@@ -57,7 +57,7 @@ adaptation <- function(lookup.type, loc.type, lookup.arg, detail = TRUE, geometr
                 adaptation.id <- parsed$adaptation
                 
                 # For each adaptation id, retrieve response from detail API:
-                adapt.resp <- lapply(adaptation.id, function(a) {
+                adapt.resp <- parallel::mclapply(adaptation.id, function(a) {
                   # Retrieve response from detail API:
                   temp.resp.adapt <- fsf.query("adaptation", "detail", a)
                   
@@ -72,7 +72,7 @@ adaptation <- function(lookup.type, loc.type, lookup.arg, detail = TRUE, geometr
                   # If geometry requested:
                   if (geometry == TRUE) {
                     # Extract geometry data from parsed response:
-                    geometry.data <- process.geometry(parsed.adapt)
+                    geometry.data <- process.geometry(parsed.adapt$geometry$polygon)
                     
                     # If retruned geometry data is non-empty:
                     if (class(geometry.data)[1] != "character") {

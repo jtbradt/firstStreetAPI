@@ -4,10 +4,10 @@
 \alias{process.geometry}
 \title{Process geometry function}
 \usage{
-process.geometry(parsed.data)
+process.geometry(geometry.data)
 }
 \arguments{
-\item{parsed.data}{is the parsed response from the FSF API}
+\item{geometry.data}{is the relevant geometry data from parsed API response}
 }
 \description{
 This function process geometry returns from the FSF APIs:
