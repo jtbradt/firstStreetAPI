@@ -8,16 +8,16 @@
 process.geometry <- function(geometry.data) {
     # Extract geometry data from parsed response:
     geometry <- geometry.data$coordinates
-    
+
     # Extract geometry type from parsed response:
     type <- geometry.data$type
-    
+
     if (is.null(geometry)) {
         warning("Empty geography returned. No geography data available from API for search.")
     } else {
         # If type of geometry data is point:
         if (type %in% c("Point", "POINT", "point")) {
-            geometry.sfc <- sf::st_sfc(sf::st_point(geometry)) %>% sf::st_set_crs(., 4326)
+            geometry.sfc <- sf::st_set_crs(sf::st_sfc(sf::st_point(geometry)), 4326)
         } else {
             # If single array returned, format as list:
             if (class(geometry) == "array") {
@@ -28,7 +28,7 @@ process.geometry <- function(geometry.data) {
                   })
                 })
             }
-            
+
             # If list returned,
             if (class(geometry) == "list") {
                 geometry <- lapply(geometry, function(g) {
@@ -43,12 +43,12 @@ process.geometry <- function(geometry.data) {
                   return(temp)
                 })
             }
-            
+
             # Convert nested list of long-lat arrays to sf object:
-            geometry.sfc <- sf::st_sfc(sf::st_multipolygon(geometry)) %>% sf::st_set_crs(., 4326)
+            geometry.sfc <- sf::st_set_crs(sf::st_sfc(sf::st_multipolygon(geometry)), 4326)
         }
-        
-        
+
+
         # Return sf geometry object:
         return(geometry.sfc)
     }

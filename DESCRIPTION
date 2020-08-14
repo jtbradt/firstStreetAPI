@@ -1,13 +1,24 @@
 Package: firstStreetAPI
-Title: Functions to query the First Street Foundation API in R.
+Title: Query The First Street Foundation API
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Jacob",
            family = "Bradt",
            role = c("aut", "cre"),
            email = "jtbradt@gmail.com")
-Description: This package provides a set of R wrapper functions used to bulk extract flood data from the First Street Foundation API.
-License: Proprietary
+Description: This package provides a set of R wrapper functions used to bulk extract 
+    flood data from the First Street Foundation API. The package supports 
+    queries to all API endpoints as of v1.0 of the First Street Foundation API. 
+    For additional information on the First Street Foundation API, see 
+    https://docs.firststreet.dev/.
+License: file LICENSE
+Imports:
+    dplyr,
+    data.table,
+    httr,
+    jsonlite,
+    sf,
+    tidyr
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

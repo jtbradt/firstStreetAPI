@@ -13,8 +13,9 @@ environmental(lookup.type, loc.type, lookup.arg, api, geometry = FALSE)
 
 \item{lookup.arg}{is the location used for the lookup}
 
-\item{api}{is the specific environmental API to query
-#' @param geometry is a boolean indicating whether geometry data should be returned}
+\item{api}{is the specific environmental API to query}
+
+\item{geometry}{is a boolean indicating whether geometry data should be returned}
 }
 \description{
 This function queries the historic API:
