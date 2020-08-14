@@ -2,6 +2,7 @@
 
 export(adaptation)
 export(environmental)
+export(fema)
 export(fsf.query)
 export(get.api.key)
 export(historic)
