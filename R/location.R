@@ -27,14 +27,15 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
 
             # If unsuccessful, return HTTP code:
             if (typeof(temp.resp) == "integer") {
-                stop(paste0("FSF API query returned the following HTTP code:", temp.resp))
+                warning(paste0("FSF API query argument", lookup.arg, "returned the following HTTP code:", temp.resp))
+                return <- NULL
+            } else {
+                # Parse adaptation project summary data:
+                parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE, simplifyDataFrame = TRUE, simplifyMatrix = TRUE)
+
+                # Format return object:
+                return <- data.table::data.table(t(unlist(parsed)))
             }
-
-            # Parse adaptation project summary data:
-            parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE, simplifyDataFrame = TRUE, simplifyMatrix = TRUE)
-
-            # Format return object:
-            return <- data.table::data.table(t(unlist(parsed)))
 
         } else {
             # Retrieve list of adaptation projects obtained from given location lookup from FSF API:
@@ -42,27 +43,29 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
 
             # If unsuccessful, return HTTP code:
             if (typeof(temp.resp) == "integer") {
-                stop(paste0("FSF API query returned the following HTTP code:", temp.resp))
-            }
+                warning(paste0("FSF API query argument", lookup.arg, "returned the following HTTP code:", temp.resp))
+                return <- NULL
+            } else {
+                # Parse adaptation project summary data:
+                parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
 
-            # Parse adaptation project summary data:
-            parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
+                # Format non-geometry return object:
+                return <- parsed
+                return[[length(return)]] <- NULL
+                return <- data.frame(t(unlist(return)))
 
-            # Format non-geometry return object:
-            return <- parsed
-            return[[length(return)]] <- NULL
-            return <- data.frame(t(unlist(return)))
+                # If geometry requested:
+                if (geometry == TRUE) {
+                    # Extract geometry data from parsed response:
+                    geometry.data <- process.geometry(parsed$geometry$polygon)
 
-            # If geometry requested:
-            if (geometry == TRUE) {
-                # Extract geometry data from parsed response:
-                geometry.data <- process.geometry(parsed$geometry$polygon)
-
-                if (class(geometry.data)[1] != "character") {
-                  # Bind geometry data to non-geometry data:
-                  return <- sf::st_as_sf(cbind(return, geometry.data))
+                    if (class(geometry.data)[1] != "character") {
+                        # Bind geometry data to non-geometry data:
+                        return <- sf::st_as_sf(cbind(return, geometry.data))
+                    }
                 }
             }
+
         }
 
         # Add location type field:
