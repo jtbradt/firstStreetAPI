@@ -31,15 +31,11 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
             }
 
             # Parse adaptation project summary data:
-            parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE)
+            parsed <- jsonlite::fromJSON(httr::content(temp.resp, "text"), simplifyVector = TRUE, simplifyDataFrame = TRUE, simplifyMatrix = TRUE)
 
             # Format return object:
-            return <- data.table::data.table(t(parsed))
+            return <- data.table::data.table(t(unlist(parsed)))
 
-            # If non-property type location, unnest property counts:
-            if (loc.type != "property") {
-                return <- cbind(return[,properties:=NULL], t(unlist(return$properties)))
-            }
         } else {
             # Retrieve list of adaptation projects obtained from given location lookup from FSF API:
             temp.resp <- fsf.query("location", "detail", lookup)
