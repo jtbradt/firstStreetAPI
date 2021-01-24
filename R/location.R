@@ -38,7 +38,7 @@ location <- function(lookup.type, loc.type, lookup.arg, detail, geometry = FALSE
 
             # If non-property type location, unnest property counts:
             if (loc.type != "property") {
-                return <- cbind(return[,-"properties"], t(unlist(return$properties)))
+                return <- cbind(return[,properties:=NULL], t(unlist(return$properties)))
             }
         } else {
             # Retrieve list of adaptation projects obtained from given location lookup from FSF API:

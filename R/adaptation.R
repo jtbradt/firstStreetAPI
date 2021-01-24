@@ -11,7 +11,7 @@
 
 adaptation <- function(lookup.type, loc.type, lookup.arg, detail = TRUE, geometry = TRUE) {
     # Retrieve list of adaptation projects for lookup arguments:
-    resp <- lapply(lookup.arg, function(l) {
+    resp <- parallel::mclapply(lookup.arg, function(l) {
         # Generate location lookup:
         lookup <- location.lookup(lookup = lookup.type, type = loc.type, arg = l)
 
@@ -57,7 +57,7 @@ adaptation <- function(lookup.type, loc.type, lookup.arg, detail = TRUE, geometr
                 adaptation.id <- parsed$adaptation
 
                 # For each adaptation id, retrieve response from detail API:
-                adapt.resp <- parallel::mclapply(adaptation.id, function(a) {
+                adapt.resp <- lapply(adaptation.id, function(a) {
                   # Retrieve response from detail API:
                   temp.resp.adapt <- fsf.query("adaptation", "detail", a)
 
