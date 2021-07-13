@@ -62,26 +62,41 @@ adaptation <- function(lookup.type, loc.type, lookup.arg, detail = TRUE, geometr
                   temp.resp.adapt <- fsf.query("adaptation", "detail", a)
 
                   # Parse response from detail API:
-                  parsed.adapt <- jsonlite::fromJSON(httr::content(temp.resp.adapt, "text"), simplifyVector = TRUE)
-
-                  # Process non-geometry data:
-                  temp.return <- parsed.adapt
-                  temp.return[[length(temp.return)]] <- NULL
-                  temp.return <- data.frame(t(unlist(temp.return)))
-
-                  # If geometry requested:
-                  if (geometry == TRUE) {
-                    # Extract geometry data from parsed response:
-                    geometry.data <- process.geometry(parsed.adapt$geometry$polygon)
-
-                    # If retruned geometry data is non-empty:
-                    if (class(geometry.data)[1] != "character") {
-                      # Bind geometry data to non-geometry data:
-                      temp.return <- cbind(temp.return, geometry.data)
-                      temp.return <- sf::st_as_sf(temp.return)
-                    }
+                  parse.adapt <- function(x) {
+                    tryCatch(
+                      expr = {
+                        jsonlite::fromJSON(httr::content(x, "text"), simplifyVector = TRUE)
+                      },
+                      error = function(e) {
+                        return(NULL)
+                      }
+                    )
                   }
-                  return(temp.return)
+                  parsed.adapt <- parse.adapt(temp.resp.adapt)
+
+                  # If valid response, process:
+                  if(!is.null(parsed.adapt)) {
+                    # Process non-geometry data:
+                    temp.return <- parsed.adapt
+                    temp.return[[length(temp.return)]] <- NULL
+                    temp.return <- data.frame(t(unlist(temp.return)))
+
+                    # If geometry requested:
+                    if (geometry == TRUE) {
+                      # Extract geometry data from parsed response:
+                      geometry.data <- process.geometry(parsed.adapt$geometry$polygon)
+
+                      # If retruned geometry data is non-empty:
+                      if (class(geometry.data)[1] != "character") {
+                        # Bind geometry data to non-geometry data:
+                        temp.return <- cbind(temp.return, geometry.data)
+                        temp.return <- sf::st_as_sf(temp.return)
+                      }
+                    }
+                    return(temp.return)
+                  } else{
+                    return(NULL)
+                  }
                 })
                 adapt.resp <- data.table::rbindlist(adapt.resp, fill = TRUE)
                 return <- adapt.resp
